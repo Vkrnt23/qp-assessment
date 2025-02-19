@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:17
+    container_name: grocery_postgres_1
+    restart: always
+    environment:
+      POSTGRES_USER: grocery_user
+      POSTGRES_PASSWORD: Nik@23199
+      POSTGRES_DB: Grocery-App
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grocery_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  app:
+    build: .
+    container_name: grocery_app_1
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://grocery_user:Nik@23199@grocery_postgres_1:5432/Grocery-App
+      JWT_SECRET: abcdefghijklmnopqrstuvwxyz
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["npm", "run", "start"]
+volumes:
+  pgdata:
+   
